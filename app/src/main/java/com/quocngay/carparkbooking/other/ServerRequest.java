@@ -1,4 +1,4 @@
-package com.quocngay.carparkbooking;
+package com.quocngay.carparkbooking.other;
 
 import android.util.Log;
 
@@ -8,13 +8,11 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -52,23 +50,15 @@ public class ServerRequest {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 urlConnection.setRequestMethod("POST");
+                //send the POST out
                 OutputStream os = urlConnection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                 writer.write(getPostDataString(postParameters));
-
                 writer.flush();
                 writer.close();
                 os.close();
 //                urlConnection.setFixedLengthStreamingMode(postParameters.getBytes().length);
 //                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-                //send the POST out
-//                PrintWriter out = new PrintWriter(urlConnection.getOutputStream());
-//                out.print(postParameters);
-//                out.close();
-//                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-//                dos.write(b);
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 String res = convertStreamToString(in);
                 JSONObject json = new JSONObject(res);
