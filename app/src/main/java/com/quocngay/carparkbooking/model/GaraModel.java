@@ -88,6 +88,7 @@ public class GaraModel extends RealmObject {
                 garaModel.locationZ = obj.getString(KEY_SERVER_LOCATION_Z);
             } catch(JSONException ex) {
                 Log.e(TAG, "Error while get json attribute: " + ex.getMessage());
+                return null;
             }
         }
         return garaModel;

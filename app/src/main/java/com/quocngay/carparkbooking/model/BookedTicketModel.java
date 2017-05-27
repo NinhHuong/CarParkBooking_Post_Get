@@ -72,13 +72,15 @@ public class BookedTicketModel extends RealmObject {
                 bookedTicketModel.accountId = obj.getInt(KEY_SERVER_ACCOUNT_ID);
                 bookedTicketModel.garaModel = gara;
                 bookedTicketModel.bookedTime = Constant.KEY_DATE_TIME_FORMAT.parse(obj.getString(KEY_SERVER_BOOKED_TIME));
-                bookedTicketModel.isExpired = obj.getBoolean(KEY_SERVER_IS_EXPIRED);
+                bookedTicketModel.isExpired = obj.getInt(KEY_SERVER_IS_EXPIRED) == 1 ? true : false;
                 bookedTicketModel.checkinTime = obj.getString(KEY_SERVER_CHECKIN_TIME).equals("") ? null : Constant.KEY_DATE_TIME_FORMAT.parse(obj.getString(KEY_SERVER_CHECKIN_TIME));
                 bookedTicketModel.checkoutTime =  obj.getString(KEY_SERVER_CHECKOUT_TIME).equals("") ? null : Constant.KEY_DATE_TIME_FORMAT.parse(obj.getString(KEY_SERVER_CHECKOUT_TIME));
             } catch (JSONException e) {
                 Log.e(TAG, "error while get json attribute: " + e.getMessage());
+                return null;
             } catch (ParseException e) {
                 Log.e(TAG, "error while parse time: " + e.getMessage());
+                return null;
             }
         }
 

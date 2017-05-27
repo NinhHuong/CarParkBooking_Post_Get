@@ -84,13 +84,15 @@ public class BookedTicketAdapter extends BaseAdapter {
             holder.btnCheck.setText(context.getResources().getString(R.string.btn_checkout));
         } else {
             long diff = (new Date()).getTime() - bookedTicketModel.getBookedTime().getTime();
+//            holder.txtCountTime.setText(Constant.KEY_TIME_DURATION_FORMAT.format(new Date(diff)));
+//            holder.btnCheck.setText(context.getResources().getString(R.string.btn_checkin));
             if(diff < Constant.KEY_EXPIRED_TICKET) {
                 holder.txtCountTime.setText(Constant.KEY_TIME_DURATION_FORMAT.format(new Date(diff)));
                 holder.btnCheck.setText(context.getResources().getString(R.string.btn_checkin));
             } else {
                 holder.txtCountTime.setText(context.getResources().getString(R.string.ticket_expired));
                 holder.txtCountTime.setBackground(context.getResources().getDrawable(R.color.expriedCountTime_background));
-                holder.btnCheck.setVisibility(View.GONE);
+                holder.btnCheck.setVisibility(View.INVISIBLE);
             }
         }
 

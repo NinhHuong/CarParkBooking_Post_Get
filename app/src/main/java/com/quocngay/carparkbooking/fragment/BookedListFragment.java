@@ -1,5 +1,6 @@
 package com.quocngay.carparkbooking.fragment;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,8 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class BookedListFragment extends Fragment {
 
     private String TAG = BookedListFragment.class.getSimpleName();
@@ -30,6 +33,7 @@ public class BookedListFragment extends Fragment {
     private BookedTicketAdapter ticketAdapter;
     private View loadProgress;
     ListView listTicket;
+    SharedPreferences pref;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -57,11 +61,10 @@ public class BookedListFragment extends Fragment {
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try{
-//                SharedPreferences pref = getSharedPreferences(Constant.APP_PREF, MODE_PRIVATE);
-//                SharedPreferences.Editor edit = pref.edit();
-                int account_id = 1;  //need change
+                pref = getActivity().getSharedPreferences(Constant.APP_PREF, MODE_PRIVATE);
+                String token = pref.getString(Constant.SERVER_TOKEN, "");
                 JSONObject param = new JSONObject();
-                param.put("account_id", account_id);
+                param.put(Constant.SERVER_TOKEN, token);
                 ServerRequest sr = new ServerRequest();
                 JSONObject jsonObj = sr.getResponse("http://54.255.178.120:5000/ticket/getopenticket", param);
                 Log.e(TAG, "Response from url: " + jsonObj);
@@ -75,11 +78,17 @@ public class BookedListFragment extends Fragment {
                     JSONArray garaList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_GARA);
                     JSONArray ticketList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_TICKTET);
                     for(int i=0; i< garaList.length(); i++) {
-                        dbContext.addGaraModel(GaraModel.createByJson(garaList.getJSONObject(i)));
+                        GaraModel gara = GaraModel.createByJson(garaList.getJSONObject(i));
+                        if(gara != null) {
+                            dbContext.addGaraModel(gara);
+                        }
                     }
 
                     for(int i=0; i<ticketList.length(); i++) {
-                        dbContext.addBookedTicketModel(BookedTicketModel.createByJson(ticketList.getJSONObject(i)));
+                        BookedTicketModel ticket = BookedTicketModel.createByJson(ticketList.getJSONObject(i));
+                        if(ticket != null) {
+                            dbContext.addBookedTicketModel(ticket);
+                        }
                     }
                 }
 
