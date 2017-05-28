@@ -54,10 +54,19 @@
         android:text="time count" />
 
     <Button
-        android:id="@+id/btn_check"
+        android:id="@+id/btn_checkin"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:textColor="@color/text_color"
         android:layout_weight="1"
         android:text="@string/btn_checkin" />
+
+    <Button
+        android:id="@+id/btn_checkout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:textColor="@color/text_color"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:text="@string/btn_checkout" />
 </LinearLayout>

@@ -18,7 +18,7 @@ public class Constant {
     public static String SERVER_RESPONSE_TICKTET = "booking_ticked";
 
 
-    public static int KEY_EXPIRED_TICKET = 30 * 60 * 1000; //in milliseconds
+    public static int KEY_EXPIRED_TICKET = 30 * 60 * 1000000; //in milliseconds
     public static DateFormat KEY_DATE_TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     public static DateFormat KEY_TIME_DURATION_FORMAT = new SimpleDateFormat("hh:mm:ss");
     public static DateFormat KEY_DATE_TIME_DURATION_FORMAT = new SimpleDateFormat("dd:hh:mm");

@@ -2,7 +2,9 @@ package com.quocngay.carparkbooking.dbcontext;
 
 import com.quocngay.carparkbooking.model.BookedTicketModel;
 import com.quocngay.carparkbooking.model.GaraModel;
+import com.quocngay.carparkbooking.other.Constant;
 
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
@@ -87,6 +89,16 @@ public class DbContext {
 
     public List<BookedTicketModel> getAllBookedTicketModel(){
         return realm.where(BookedTicketModel.class).findAll();
+    }
+
+    public List<BookedTicketModel> getAllOpenBookedTicketModel(){
+        Date date = new Date(new Date().getTime() - Constant.KEY_EXPIRED_TICKET);
+        return realm.where(BookedTicketModel.class)
+                .beginGroup().isNotNull("checkinTime").isNull("checkoutTime").endGroup()
+                .or()
+                .beginGroup().isNull("checkinTime").greaterThan("bookedTime", date).endGroup()
+//                .equalTo("isExpired", false)
+                .findAll();
     }
 
     public BookedTicketModel getBookedTicketModelByID(int id) {

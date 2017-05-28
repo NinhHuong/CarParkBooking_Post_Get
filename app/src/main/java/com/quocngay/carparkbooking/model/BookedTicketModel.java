@@ -27,6 +27,8 @@ public class BookedTicketModel extends RealmObject {
     public static String KEY_SERVER_CHECKIN_TIME = "checkin_time";
     public static String KEY_SERVER_CHECKOUT_TIME = "checkout_time";
     public static String KEY_SERVER_IS_EXPIRED = "is_expired";
+    public static String KEY_SERVER_USER_INPUT = "user_input";
+    public static String KEY_SERVER_IS_VALID_TOKEN = "is_valid_token";
     private static String TAG = BookedTicketModel.class.getSimpleName();
     
     @PrimaryKey

@@ -2,21 +2,34 @@ package com.quocngay.carparkbooking.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.quocngay.carparkbooking.R;
 import com.quocngay.carparkbooking.dbcontext.DbContext;
 import com.quocngay.carparkbooking.fragment.BookedListFragment;
+import com.quocngay.carparkbooking.model.BookedTicketModel;
+import com.quocngay.carparkbooking.model.GaraModel;
+import com.quocngay.carparkbooking.other.BookedTicketAdapter;
 import com.quocngay.carparkbooking.other.Constant;
 import com.quocngay.carparkbooking.other.MyPagerAdapter;
+import com.quocngay.carparkbooking.other.ServerRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
@@ -24,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private String TAG = BookedListFragment.class.getSimpleName();
     private DbContext dbContext;
     private View loadProgress;
+    private BookedTicketAdapter ticketAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
             finish();
         } else {
+            new UpdateData().execute();
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
 
@@ -111,5 +126,61 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class UpdateData extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try{
+                String token = pref.getString(Constant.SERVER_TOKEN, "");
+                JSONObject param = new JSONObject();
+                param.put(Constant.SERVER_TOKEN, token);
+                ServerRequest sr = new ServerRequest();
+                JSONObject jsonObj = sr.getResponse("http://54.255.178.120:5000/ticket/getopenticket", param);
+                Log.e(TAG, "Response from url: " + jsonObj);
+
+                // Getting JSON Array node
+                if(jsonObj == null) {
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.fail_internet_connection), Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                if(jsonObj.getBoolean(Constant.SERVER_RESPONSE)) {
+                    dbContext = DbContext.getInst();
+                    JSONArray garaList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_GARA);
+                    JSONArray ticketList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_TICKTET);
+                    for(int i=0; i< garaList.length(); i++) {
+                        GaraModel gara = GaraModel.createByJson(garaList.getJSONObject(i));
+                        if(gara != null) {
+                            dbContext.addGaraModel(gara);
+                        }
+                    }
+
+                    for(int i=0; i<ticketList.length(); i++) {
+                        BookedTicketModel ticket = BookedTicketModel.createByJson(ticketList.getJSONObject(i));
+                        if(ticket != null) {
+                            dbContext.addBookedTicketModel(ticket);
+                        }
+                    }
+                }
+
+                return true;
+            } catch(JSONException ex) {
+                Log.e(TAG, "Json parsing error: " + ex.getMessage());
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            /*if(result) {
+                dbContext = DbContext.getInst();
+                List<BookedTicketModel> ticketList = dbContext.getAllBookedTicketModel();
+                ticketAdapter = new BookedTicketAdapter(ticketList, );
+                listTicket.setAdapter(ticketAdapter);
+            }*/
+//            Common.showProgress(false, loadProgress, listTicket, getContext());
+        }
+    }
+
 
 }

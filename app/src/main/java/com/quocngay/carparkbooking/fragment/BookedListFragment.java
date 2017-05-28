@@ -49,15 +49,15 @@ public class BookedListFragment extends Fragment {
         loadProgress = (View) getView().findViewById(R.id.load_data_progress);
         listTicket = (ListView) getView().findViewById(R.id.list_ticket);
 
-        List<BookedTicketModel> ticketList = dbContext.getAllBookedTicketModel();
+        List<BookedTicketModel> ticketList = dbContext.getAllOpenBookedTicketModel();
         ticketAdapter = new BookedTicketAdapter(ticketList, getContext());
         listTicket.setAdapter(ticketAdapter);
 
 //        Common.showProgress(true, loadProgress, listTicket, getContext());
-        new UpdateData().execute();
+//        new UpdateData().execute();
     }
 
-    public class UpdateData extends AsyncTask<Void, Void, Boolean> {
+    /*public class UpdateData extends AsyncTask<Void, Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try{
@@ -111,5 +111,5 @@ public class BookedListFragment extends Fragment {
 //            Common.showProgress(false, loadProgress, listTicket, getContext());
         }
     }
-
+*/
 }
