@@ -1,4 +1,4 @@
-package com.quocngay.carparkbooking;
+package com.quocngay.carparkbooking.other;
 
 import android.util.Log;
 
@@ -8,13 +8,11 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -52,33 +50,25 @@ public class ServerRequest {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                //send the POST out
                 OutputStream os = urlConnection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                 writer.write(getPostDataString(postParameters));
-
                 writer.flush();
                 writer.close();
                 os.close();
-//                urlConnection.setFixedLengthStreamingMode(postParameters.getBytes().length);
-//                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-                //send the POST out
-//                PrintWriter out = new PrintWriter(urlConnection.getOutputStream());
-//                out.print(postParameters);
-//                out.close();
-//                DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-//                dos.write(b);
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                String res = convertStreamToString(in);
-                JSONObject json = new JSONObject(res);
-                return json;
-            }
-
-            // handle issues
-            int statusCode = urlConnection.getResponseCode();
-            if (statusCode != HttpURLConnection.HTTP_OK) {
-                // throw some exception
+                // handle issues
+                if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    InputStream in  = urlConnection.getErrorStream();
+                    Log.e(TAG, in.toString());
+                }
+                else {
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    String res = convertStreamToString(in);
+                    JSONObject json = new JSONObject(res);
+                    return json;
+                }
             }
 
             // read output (only for GET)
@@ -91,15 +81,15 @@ public class ServerRequest {
                 return json;
             }
         } catch (JSONException e) {
-            // handle error parser json
+            Log.e(TAG, e.getMessage());
         }catch (MalformedURLException e) {
-            // handle invalid URL
+            Log.e(TAG, e.getMessage());
         } catch (SocketTimeoutException e) {
-            // hadle timeout    
+            Log.e(TAG, e.getMessage());
         } catch (IOException e) {
-            // handle I/0
+            Log.e(TAG, e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
