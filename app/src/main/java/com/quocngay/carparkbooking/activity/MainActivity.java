@@ -140,10 +140,15 @@ public class MainActivity extends AppCompatActivity {
 
                 // Getting JSON Array node
                 if(jsonObj == null) {
-                    Toast.makeText(MainActivity.this, getResources().getString(R.string.fail_internet_connection), Toast.LENGTH_LONG).show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, getResources().getString(R.string.fail_internet_connection), Toast.LENGTH_LONG).show();
+                        }
+                    });
+
                     return false;
-                }
-                if(jsonObj.getBoolean(Constant.SERVER_RESPONSE)) {
+                } else if(jsonObj.getBoolean(Constant.SERVER_RESPONSE)) {
                     dbContext = DbContext.getInst();
                     JSONArray garaList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_GARA);
                     JSONArray ticketList = jsonObj.getJSONObject(Constant.SERVER_RESPONSE_DATA).getJSONArray(Constant.SERVER_RESPONSE_TICKTET);

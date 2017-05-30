@@ -3,6 +3,7 @@ package com.quocngay.carparkbooking.other;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by ninhh on 5/23/2017.
@@ -76,8 +78,8 @@ public class BookedTicketAdapter extends BaseAdapter {
                     try {
                         JSONObject param = new JSONObject();
                         param.put(BookedTicketModel.KEY_SERVER_ID, bookedTicketModel.getId());
-                        ServerRequest sr = new ServerRequest();
-                        JSONObject jsonObj = sr.getResponse("http://54.255.178.120:5000/ticket/create", param);
+                        String url = "http://54.255.178.120:5000/token/create";
+                        JSONObject jsonObj = new CheckinTask(url, param).execute().get();
                         if(jsonObj == null || !jsonObj.getBoolean(Constant.SERVER_RESPONSE)) {
                             Toast.makeText(context, context.getResources().getString(R.string.fail_internet_connection), Toast.LENGTH_LONG).show();;
                         } else {
@@ -85,6 +87,10 @@ public class BookedTicketAdapter extends BaseAdapter {
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, e.getMessage());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
                     }
                 }
             });
@@ -171,8 +177,8 @@ public class BookedTicketAdapter extends BaseAdapter {
                             JSONObject param = new JSONObject();
                             param.put(BookedTicketModel.KEY_SERVER_ID, bookedTicketModel.getId());
                             param.put(BookedTicketModel.KEY_SERVER_USER_INPUT, userInput.getText().toString().trim());
-                            ServerRequest sr = new ServerRequest();
-                            JSONObject jsonObj = sr.getResponse("http://54.255.178.120:5000/ticket/validate", param);
+                            String url = "http://54.255.178.120:5000/token/validate";
+                            JSONObject jsonObj = new CheckinTask(url, param).execute().get();
                             Log.e(TAG, "Response from url: " + jsonObj);
 
                             if(jsonObj == null || !jsonObj.getBoolean(Constant.SERVER_RESPONSE)) {
@@ -188,14 +194,11 @@ public class BookedTicketAdapter extends BaseAdapter {
                             }
                         } catch (JSONException e) {
                             Log.e(TAG, e.getMessage());
-                        }/*
-                        if(userInput.getText().toString().trim().equals("1234")) {
-                            Toast.makeText(context, "Correct toked. Map will show here", Toast.LENGTH_LONG).show();
-                            dialog.dismiss();
-                        } else {
-                            Toast.makeText(context, context.getResources().getString(R.string.invalid_token_message), Toast.LENGTH_LONG).show();
-                            userInput.setText("");
-                        }*/
+                        }catch (InterruptedException e) {
+                            Log.e(TAG, e.getMessage());
+                        } catch (ExecutionException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
                     }
                 });
 
@@ -221,5 +224,29 @@ public class BookedTicketAdapter extends BaseAdapter {
         TextView txtCountTime;
         Button btnCheckin;
         Button btnCheckout;
+    }
+
+    class CheckinTask extends AsyncTask<Object, Object, JSONObject> {
+
+        private String url;
+        private JSONObject param;
+
+        public CheckinTask(String url, JSONObject param) {
+            this.url = url;
+            this.param = param;
+        }
+
+        @Override
+        protected JSONObject doInBackground(Object... arg0) {
+            try{
+                ServerRequest sr = new ServerRequest();
+                JSONObject jsonObj = sr.getResponse(url, param);
+                return jsonObj;
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+                return null;
+            }
+        }
+
     }
 }

@@ -50,6 +50,7 @@ public class ServerRequest {
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 //send the POST out
                 OutputStream os = urlConnection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
@@ -57,18 +58,17 @@ public class ServerRequest {
                 writer.flush();
                 writer.close();
                 os.close();
-//                urlConnection.setFixedLengthStreamingMode(postParameters.getBytes().length);
-//                urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                String res = convertStreamToString(in);
-                JSONObject json = new JSONObject(res);
-                return json;
-            }
-
-            // handle issues
-            int statusCode = urlConnection.getResponseCode();
-            if (statusCode != HttpURLConnection.HTTP_OK) {
-                // throw some exception
+                // handle issues
+                if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    InputStream in  = urlConnection.getErrorStream();
+                    Log.e(TAG, in.toString());
+                }
+                else {
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                    String res = convertStreamToString(in);
+                    JSONObject json = new JSONObject(res);
+                    return json;
+                }
             }
 
             // read output (only for GET)
@@ -81,15 +81,15 @@ public class ServerRequest {
                 return json;
             }
         } catch (JSONException e) {
-            // handle error parser json
+            Log.e(TAG, e.getMessage());
         }catch (MalformedURLException e) {
-            // handle invalid URL
+            Log.e(TAG, e.getMessage());
         } catch (SocketTimeoutException e) {
-            // hadle timeout    
+            Log.e(TAG, e.getMessage());
         } catch (IOException e) {
-            // handle I/0
+            Log.e(TAG, e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
