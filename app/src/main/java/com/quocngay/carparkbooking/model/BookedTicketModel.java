@@ -144,4 +144,6 @@ public class BookedTicketModel extends RealmObject {
     public Date getCheckoutTime() {
         return checkoutTime;
     }
+
+
 }

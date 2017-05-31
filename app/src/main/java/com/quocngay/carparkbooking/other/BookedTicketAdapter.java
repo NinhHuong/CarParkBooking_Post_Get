@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,6 +68,8 @@ public class BookedTicketAdapter extends BaseAdapter {
             holder.btnCheckin = (Button) convertView.findViewById(R.id.btn_checkin);
             holder.btnCheckout = (Button) convertView.findViewById(R.id.btn_checkout);
             convertView.setTag(holder);
+
+            new cdTimer(10000,1000,holder.txtCountTime);
 
             //on click event
             holder.btnCheckin.setOnClickListener(new View.OnClickListener() {
@@ -221,5 +224,32 @@ public class BookedTicketAdapter extends BaseAdapter {
         TextView txtCountTime;
         Button btnCheckin;
         Button btnCheckout;
+    }
+
+    public class cdTimer extends CountDownTimer {
+        TextView txtShow;
+        long second = 1000, minute =second*60;
+        public cdTimer(long millisInFuture, long countDownInterval,TextView txtShow) {
+            super(millisInFuture, countDownInterval);
+            second = countDownInterval;
+            this.txtShow = txtShow;
+        }
+
+        @Override
+        public void onFinish() {
+            txtShow.setText("Time out.");
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            txtShow.setText(changeMillisToMinute(millisUntilFinished));
+        }
+
+        private String changeMillisToMinute(long millisUntilFinished){
+            String result = "";
+            result += millisUntilFinished /minute;
+            result +=(millisUntilFinished - millisUntilFinished /minute)/second;
+            return  result;
+        }
     }
 }

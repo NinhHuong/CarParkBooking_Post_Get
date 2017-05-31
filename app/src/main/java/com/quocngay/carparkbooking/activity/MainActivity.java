@@ -1,5 +1,6 @@
 package com.quocngay.carparkbooking.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -29,8 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private SharedPreferences pref;
@@ -58,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
 
             TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.booked_list));
-            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.map));
-            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.profile));
+//            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.booked_list));
+//            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.map));
+//            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.profile));
             tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
@@ -121,6 +120,18 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+
+            return true;
+        }
+
+        if(id == R.id.action_Logout){
+            SharedPreferences.Editor editor = pref.edit();
+            editor.clear();
+            editor.commit();
+            Intent myIntent = new Intent(getBaseContext(), LoginActivity.class);
+            startActivity(myIntent);
+//            Toast.makeText(getApplicationContext(),"Token: "+pref.getString("token",""),Toast.LENGTH_SHORT).show();
             return true;
         }
 
