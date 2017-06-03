@@ -1,8 +1,10 @@
-package com.quocngay.carparkbooking;
+package com.quocngay.carparkbooking.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -28,7 +30,10 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.quocngay.carparkbooking.R;
+import com.quocngay.carparkbooking.other.Constant;
+import com.quocngay.carparkbooking.other.ServerRequest;
 
 import org.json.JSONObject;
 
@@ -48,22 +53,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    SharedPreferences pref;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private TextView tvSignUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +85,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        pref = getSharedPreferences(Constant.APP_PREF, MODE_PRIVATE);
+
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -95,6 +97,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        tvSignUp = (TextView) findViewById(R.id.sign_up_tv);
+        tvSignUp.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void populateAutoComplete() {
@@ -301,6 +313,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private boolean isExistEmail;
+        private boolean isCorrectPassword;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -316,13 +330,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 param.put("email", mEmail);
                 param.put("password", mPassword);
                 ServerRequest sr = new ServerRequest();
-                JSONObject res = sr.getResponse("http://54.255.178.120:5000/account/login", param);
-                if(res.getBoolean("res")) {
+                JSONObject response = sr.getResponse("http://54.255.178.120:5000/account/login", param);
+
+                isExistEmail = response.getBoolean(Constant.SERVER_EMAIL);
+                isCorrectPassword = response.getBoolean(Constant.SERVER_PASSWORD);
+                if(isExistEmail && isCorrectPassword) {
+                    //Storing Data using SharedPreferences
+                    SharedPreferences.Editor edit = pref.edit();
+                    edit.putString("token", response.getString(Constant.SERVER_TOKEN));
+                    edit.commit();
                     return true;
                 } else {
                     return false;
                 }
-//                Thread.sleep(2000);
             } catch (Exception e) {
                 return false;
             }
@@ -334,11 +354,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-//                finish();
-                Toast.makeText(getApplicationContext(), "Login success", Toast.LENGTH_LONG).show();
+                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(i);
+                finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if(!isExistEmail) {
+                    mEmailView.setError(getString(R.string.error_not_exist_email));
+                    mEmailView.requestFocus();
+                } else if(!isCorrectPassword) {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                }
             }
         }
 
